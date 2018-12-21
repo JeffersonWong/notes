@@ -1,0 +1,22 @@
+1.准备器材：
+A4纸、Loopback Plug专用器件、测试机2台、有效SIM卡一张(测试流量控制时需要)。
+
+
+2.将测试应用包android-cts-verifier-7.0_r13-linux_x86-arm.zip拷贝到CTS目录,并解压.
+CtsVerifier.apk －－主程序，测试前安装
+cts-usb-accessory  －－在"USB Accessory Test"测试时，连接手机到linux上运行。
+CtsPermissionApp.apk  －－测试到"BYOD Managed Provisioning/Permissions lockdown"时安装。
+NotificationBot.apk  －－测试前安装(Notification Package Priority Test需要)。
+
+需要安装的3个apk，都要用adb install。
+
+
+3.安装CtsVerifier.apk，启动应用开始测试。
+
+4.测试经验： 
+Camera FOV Calibration 测试时，最好确保手机和A4纸摆放平行，且摄像头正对A4纸中心点。
+MANAGED PROVISIONING这个里面的测试项开始测试之前需要先进行手机加密、此项建议最后测试
+WiFi configuration lockdown需要用自己手机准备一个路由或者手机热点、其密码务必是“defaultpassword”、然后输入该网络SSID名称连接、开始测试。
+
+
+5.测试完成后，保存测试报告，导入电脑。

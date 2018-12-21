@@ -1,0 +1,52 @@
+--------------------------------------L3035_WQVGA-----------------------------------------------------
+【代码】
+svn export http://192.168.1.242:81/svn/6820/trunk/MocorDroid2.3.5_W12.20_P20.01 L6820_WQVGA --force
+
+svn export http://192.168.1.242:81/svn/6820/trunk/去掉美光flash L6820_WQVGA --force
+
+【编译】
+./mk -o=usr:nsc:2sim sp6820a_3035_hwd_wqvga n
+【更新】
+./mk -o=usr:nsc:2sim sp6820a_3035_hwd_wqvga u adr **/**
+【打包】
+./mk -o=usr:nsc:2sim sp6820a_3035_hwd_wqvga pac system
+
+--------------------------------------L3035_WVGA------------------------------------------------------
+【代码】L3035_WVGA_SMART6820_HWD_CTP_V03.03B01
+svn export http://192.168.1.242:81/svn/6820/trunk/MocorDroid2.3.5_W12.20_P20.01 L6820_WVGA --force
+
+svn export http://192.168.1.242:81/svn/6820/trunk/去掉美光flash L6820_WVGA --force
+
+【编译】
+./mk -o=usr:nsc:2sim sp6820a_3035_hwd_wvga n
+【更新】
+./mk -o=usr:nsc:2sim sp6820a_3035_hwd_wvga u adr **/**
+【打包】
+./mk -o=usr:nsc:2sim sp6820a_3035_hwd_wvga pac system
+
+--------------------------------------L9820_HVGA------------------------------------------------------
+【代码】
+svn export http://192.168.1.242:81/svn/6820/trunk/MocorDroid2.3.5_W12.20_P20.01 L9820_HVGA --force
+
+【编译】
+./mk -o=usr:nsc:2sim sp6820a_9820_alw_hvga n
+【更新】
+./mk -o=usr:nsc:2sim sp6820a_9820_alw_hvga u adr **/**
+【打包】
+./mk -o=usr:nsc:2sim sp6820a_9820_alw_hvga pac system
+
+--------------------------------------L9820_FWVGA------------------------------------------------------
+【代码】
+svn export http://192.168.1.242:81/svn/6820/trunk/MocorDroid2.3.5_W12.20_P20.01 L9820_FWVGA --force
+
+【编译】
+./mk -o=usr:nsc:2sim sp6820a_9820_alw_fwvga n
+【更新】
+./mk -o=usr:nsc:2sim sp6820a_9820_alw_fwvga u adr **/**
+【打包】
+./mk -o=usr:nsc:2sim sp6820a_9820_alw_fwvga pac system
+
+
+
+
+debu版本 可以修改customer_cfg\sp6820a_3033_1_realtek\res  BoardConfig.mk中  WITH_DEXPREOPT :=true

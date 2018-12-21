@@ -1,0 +1,38 @@
+1.将测试用例android-cts-7.0_r13-linux_x86-arm.zip和media包android-cts-media-1.3.zip拷贝到CTS目录,并解压.
+
+2.进入cts目录
+CTS:
+
+chmod -R 777 ./android-cts/
+chmod -R 544 ./android-cts-media-1.3/
+
+3.进入./android-cts-media-1.3/
+执行
+./copy_media.sh 
+./copy_images.sh
+
+4.回到cts目录,执行./android-cts/tools/cts-tradefed
+进入cts指令界面，即准备测试cts
+
+5.执行run cts --plan CTS
+开始测试
+
+6.继续测试:run cts --retry Session_id
+输入l r查询 Session_id
+
+
+7.单跑模块
+run cts -m "Module Name" -t "Class Name"
+run cts -m "CtsAppSecurityHostTestCases" -t "android.appsecurity.cts.DirectBootHostTest#testDirectBootEmulated"
+run cts -m "CtsDevicePolicyManagerTestCases" -t "com.android.cts.devicepolicy.MixedManagedProfileOwnerTest#testApplicationHidden"
+run cts -m "CtsDevicePolicyManagerTestCases" -t "com.android.cts.devicepolicy.MixedManagedProfileOwnerTest#testSetWallpaper_disallowed"
+run cts -m "CtsTelephonyTestCases" -t "android.telephony.cts.MmsTest#testSendMmsMessage"
+run cts -m "CtsTelephonyTestCases" -t "android.telephony.cts.SmsManagerTest#testSendAndReceiveMessages"
+run cts -m "CtsCameraTestCases" -t "android.hardware.camera2.cts.FlashlightTest#testSetTorchModeOnOff"
+run cts -m "CtsTelephonyTestCases" -t ""
+run cts -m "CtsTelephonyTestCases" -t ""
+
+8.抓log
+adb logcat -v time > androidlog.txt
+adb logcat -v time -b events > eventslog.txt
+adb logcat -v time -b radio > radiolog.txt

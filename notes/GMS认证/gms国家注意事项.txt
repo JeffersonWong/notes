@@ -1,0 +1,86 @@
+如下国家不允许预置Play Movies这个core app:
+Algeria            阿尔及利亚
+The Bahamas        巴哈马群岛
+Bangladesh          孟加拉国
+Cameroon           喀麦隆
+Cuba               古巴
+Ghana               加纳
+Guinea-Bissau       几内亚比绍
+Iran                 伊朗
+Israel               以色列
+Kenya                   肯尼亚
+Macau               澳门
+Morocco             摩洛哥
+Mozambique          莫桑比克
+Myanmar             缅甸
+Netherland Antilles 荷属安的列斯群岛
+Nigeria             尼日利亚
+Pakistan            巴基斯坦
+Serbia              塞尔维亚
+Tunisia             突尼斯
+Yemen                也门
+
+
+
+
+
+
+
+
+
+对于Android Go项目，大部分国家是要求预置YouTube Go.
+如下国家不允许预置YouTube Go,需要预置普通版本的YouTube:
+
+非欧盟国家：
+Bosnia and Herzegovina
+Canada
+Hong Kong
+Israel
+Japan
+Kuwait
+Republic of Macedonia
+New Zealand
+Oman
+Qatar
+Russia
+Saudi Arabia
+Serbia
+Singapore
+South Korea
+Switzerland
+Taiwan
+Ukraine
+United Arab Emirates
+United States
+
+欧盟国家:
+Australia
+Belgium
+Bulgaria
+Croatia
+Czech Republic
+Denmark
+Estonia
+Finland
+France
+Germany
+Greece
+Hungary
+Iceland
+Republic of Ireland
+Italy
+Latvia
+Lithuania
+Luxembourg
+Netherlands
+Norway
+Poland
+Portugal
+Romania
+Slovakia
+Slovenia
+Spain
+Sweden
+United Kingdom
+
+

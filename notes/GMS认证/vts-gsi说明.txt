@@ -1,0 +1,8 @@
+        在设置中打开 OEM unlocking 选项
+        在设置中打开 USB debugging 选项
+        长按音量 + 和电源键进入fastboot模式
+        连接到电脑上，分别执行fastboot oem unlock，
+        执行命令后需要选择音量 + 来确认unlock。
+        执行 fastboot 命令刷入google提供的 system.img (GSI)：
+        fastboot flash system xxx.img（需要根据软件版本的信息来选择GSI版本）
+        重启： fastboot reboot

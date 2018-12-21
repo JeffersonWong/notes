@@ -1,0 +1,38 @@
+1.环境变量
+//export PATH=/out/host/linux-x86/bin:/out/host/linux-x86/lib:/out/host/linux-x86lib64:$PATH
+source cts_D8065_Q6_YN
+
+$PATH 查询是否设置成功
+
+2.查询usb设备ID
+lsusb
+
+Bus 006 Device 002: ID 8087:8001 Intel Corp.
+Bus 006 Device 001: ID 1d6b:0002 Linux Foundation 2.0 root hub
+Bus 004 Device 001: ID 1d6b:0003 Linux Foundation 3.0 root hub
+Bus 003 Device 001: ID 1d6b:0002 Linux Foundation 2.0 root hub
+Bus 005 Device 002: ID 8087:8009 Intel Corp.
+Bus 005 Device 001: ID 1d6b:0002 Linux Foundation 2.0 root hub
+Bus 002 Device 001: ID 1d6b:0003 Linux Foundation 3.0 root hub
+Bus 001 Device 005: ID 0e8d:201d MediaTek Inc.
+Bus 001 Device 001: ID 1d6b:0002 Linux Foundation 2.0 root hub
+
+3.添加usb设备：/etc/udev/rules.d/70-android.rules （没有则新建）
+SUBSYSTEM=="usb", ATTRS{idVendor}=="0e8d", ATTRS{idProduct}=="201d",MODE="0666"
+
+4.配置adb usb端口
+\\192.168.1.218\ycl\.android\adb_usb.ini
+
+0x1782
+0x0e8d
+
+5.重启adb服务
+sudo chmod a+rx /etc/udev/rules.d/70-android.rules
+sudo /etc/init.d/udev restart
+adb kill-server
+
+6.查询adb是否成功
+adb devices
+
+List of devices attached
+0123456789ABCDEF        device

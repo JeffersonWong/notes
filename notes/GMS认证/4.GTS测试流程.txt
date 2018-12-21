@@ -1,0 +1,31 @@
+1.进入gts目录
+GTS:
+
+chmod -R 777 ./4.1/
+chmod -R 777 ./5.0/
+
+2.
+cd ./4.1/android-gts
+执行./tools/gts-tradefed
+进入指令界面，准备GTS测试
+
+3.执行run gts --plan GTS，开始GTS测试
+
+4.继续测试:run gts --retry Session_id
+输入l r查询 Session_id
+
+5.单跑模块
+run gts -m "Module Name" -t "Class Name"
+run gts -m "GtsMediaTestCases" -t "com.google.android.media.gts.WidevineHEVCPlaybackTests"
+run gts -m "GtsPermissionTestCases" -t "com.google.android.permission.gts.DefaultPermissionGrantPolicyTest"
+
+
+6.
+cd ./5.0/android-gts
+执行./tools/gts-tradefed
+进入指令界面，准备GTS 5.0测试
+
+7.执行
+run gts --include-filter GtsPackageNameCertPairsDeviceTestCases --include-filter GtsInstallPackagesWhitelistDeviceTestCases --include-filter  GtsAppBlacklistDeviceTestCases
+注意是一行,不能有回车
+

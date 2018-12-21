@@ -1,0 +1,234 @@
+1 先跑Camera模块
+CtsCameraTestCases
+android.hardware.camera2.cts.RobustnessTest#testMandatoryOutputCombinations
+
+KEY_PICTURE_SIZE相机尺寸，不插值，KEY_PREVIEW_SIZE去掉"1920x1080",    "1920x1088", 
+
+
+
+2.
+ CtsIncidentHostTestCases
+
+com.android.server.cts.GraphicsStatsValidationTest#testJankyDrawFrame
+
+Dear Customer，
+   请参考如下修改，测试一下：
+kernel-3.18\drivers\misc\mediatek\lcm
+中找到自己的project
+kernel-3.18\drivers\misc\mediatek\lcm\projectname\XXX.c文件
+
+在函数lcm_get_params函数里面，有个pll_clock
+
+适当调大使fps成为60，
+把LK里面的这个文件也修改下
+vendor\mediatek\proprietary\bootloader\lk\dev\lcm\projectname\XXX.c
+
+跟kernel里改成一样的。
+
+修改后整个编译后重新烧进去测试；
+
+谢谢！
+
+2.vts
+VtsHalCameraProviderV2_4Target
+
+VtsHalCameraProviderV2_4Target#CameraHidlTest.getCameraIdList/internal/0_32bit	
+fail
+	
+hardware/interfaces/camera/provider/2.4/vts/functional/VtsHalCameraProviderV2_4TargetTest.cpp:1045
+
+
+
+
+
+
+*************** CDD checklist****************************************
+1.
+
+
+2.
+adb shell am start -W -a android.intent.action.VIEW -d 'https://www.wikipedia.org/' | grep -c com.android.chrome
+adb shell am start -W -a android.intent.action.VIEW -d 'http://www.wikipedia.org/' | grep -c com.android.chrome
+adb shell am start -W -t image/* file://tmp/cute.jpg | grep -c com.google.android.apps.photos
+adb shell am start -W -t image/* file://tmp/cute.mp4 | grep -c com.google.android.apps.photos
+adb shell am start -W -a com.android.camera.action.REVIEW -t image/* | grep -c com.google.android.apps.photos
+adb shell am start -W -a android.intent.action.PICK -t image/* | grep -c com.google.android.apps.photos
+adb shell am start -W -a android.intent.action.SENDTO -d sms:CCXXXXXXXXXX | grep -c com.google.android.apps.messaging
+adb shell am start -W -a android.intent.action.SENDTO -d smsto:CCXXXXXXXXXX | grep -c com.google.android.apps.messaging
+adb shell am start -W -a android.intent.action.VIEW -d content://com.android.calendar/time/1410665898789 | grep -c com.google.android.calendar
+adb shell am start -W -a android.intent.action.SENDTO -d mailto:someone@gmail.com | grep -c com.google.android.gm
+adb shell dumpsys package com.google.android.gm | grep -c "android.permission.READ_CALENDAR: granted=true"
+adb shell dumpsys package com.google.android.gm | grep -c "android.permission.WRITE_CALENDAR: granted=true"
+
+adb shell dumpsys package com.google.android.gm | grep -c "android.permission.READ_CONTACTS: granted=true"
+adb shell dumpsys package com.google.android.gm | grep -c "android.permission.WRITE_CONTACTS: granted=true"
+
+adb shell settings get secure default_input_method | grep -c com.google.android.inputmethod
+
+adb shell ime list -a | grep mId | grep -v -c mId=com.google.android
+
+
+adb shell am start -W -a android.intent.action.VOICE_COMMAND | grep -c com.google.android.googlequicksearchbox
+
+
+adb shell am start -W -a android.intent.action.WEB_SEARCH -e query wikipedia | grep -c com.google.android.googlequicksearchbox
+
+
+3.
+adb shell pm list features
+
+
+6.
+adb shell "getprop | grep ro.product.name"
+
+adb shell "getprop | grep ro.product.device"
+
+
+adb shell "getprop | grep ro.com.google.gmsversion"
+
+
+7.
+adb shell "getprop | grep ro.com.google.gmsversion"
+
+8.
+adb shell "getprop | grep ro.product.manufacturer"
+
+9.
+GSI  adb shell "getprop | grep ro.vendor.product.model"
+User adb shell "getprop | grep  ro.product.model"
+
+
+GSI adb shell "getprop | grep ro.vendor.product.manufacturer"
+User    adb shell "getprop | grep ro.product.manufacturer"
+ 
+adb shell "getprop |grep density" 
+
+10.
+adb shell "getprop| grep clientid"
+
+11.
+adb shell "getprop| grep first_api_level"
+
+12.
+adb shell "am start com.mediatek.mtklogger/.MainActivity"
+
+*******************************************************
+
+
+
+
+
+
+**************************************
+run cts-on-gsi
+
+1、VTS简介
+
+VTS的全称是 Vendor Test Suite（供应商测试套件）。
+为何引入VTS测试？
+
+目前Android的系统升级是很麻烦的，为了能更快的将设备升级到新的Android版本，Android O 开始新引入了 Project Treble，Project Treble 适用于搭载 Android O 及后续版本的所有新设备。
+
+Android 7.x 及更早版本中没有正式的Vendor层接口，因此每次更新系统都相对耗时和困难：
+treble_blog_before.png
+
+Android O 之后，Treble 提供了稳定的Vendor层接口，供设备制造商访问 Android 代码中特定于硬件的部分，这样就可以只更新框架层，减少升级系统带来的成本和困难：
+treble_blog_after.png
+
+为了确保Vendor层实现的前向兼容性，新的Vendor层接口会由供应商测试套件 (VTS) 进行验证，该套件类似于兼容性测试套件 (CTS)。
+2、VTS测试流程
+1）替换谷歌system.img
+
+VTS测试要求刷入谷歌提供AOSP的system.img (GSI)。在user版本中，如果直接使用flash tool单独烧录GSI时，会导致无法开机。
+
+之所以会出现这种问题，是由于在user/userdebug版本中，dm-verity是使能的，替换GSI后导致dm-verity不能通过。 如果要解决这个问题，就需要进行unlock操作，并且要用fastboot来刷入刷入谷歌提供的system.img .
+具体操作如下：
+
+        在设置中打开 OEM unlocking 选项
+        在设置中打开 USB debugging 选项
+        长按音量 + 和电源键进入fastboot模式
+        连接到电脑上，分别执行fastboot oem unlock，
+        执行命令后需要选择音量 + 来确认unlock。
+        执行 fastboot 命令刷入google提供的 system.img (GSI)：
+        fastboot flash system xxx.img（需要根据软件版本的信息来选择GSI版本）
+        重启： fastboot reboot
+
+2）VTS测试
+Running VTS
+主机端设置
+
+    首先设置基本测试环境 GMS测试环境.
+
+    VTS测试环境配置：
+    安装 Python 开发工具包：sudo apt-get install python-dev
+    安装协议缓冲区工具（适用于 Python）：sudo apt-get install python-protobuf protobuf-compiler
+    安装 Python 虚拟环境相关工具：sudo apt-get install python-virtualenv python-pip
+
+    下载并解压VTS测试工具
+
+手机端设置
+
+    擦除设备上的用户数据（即运行fastboot -w）。
+
+    刷入谷歌提供的system.img (GSI)，使用与设备的ABI相对应的GSI，是否支持A / B更新以及设备的security_patch_level：
+    ABI 	A/B 	Non A/B 	security_patch_level
+    Arm64 	aosp_arm64_ab 	aosp_arm64_a 	Uses the format: [year][month][date]
+    Arm32 	aosp_arm_ab 	aosp_arm_a 	Uses the format: [year][month][date]
+    x86_64 	aosp_x86_64_ab 	aosp_x86_64_a 	Uses the format: [year][month][date]
+    x86_32 	aosp_x86_32_ab 	aosp_x86_32_a 	Uses the format: [year][month][date]
+
+    Android 8.x的设备不需要安装SIM卡，但是Android P及更高版本的设备将需要SIM卡进行VTS测试。
+
+    确保手机可以连接到IPV6的wifi网络，如果设备具有GPS / Wi-Fi / Cellular功能，则必须重置设备并打开位置设置。
+
+    通过usb将手机连接到电脑上，通过 adb shell 来保证可以正确的连接。
+
+运行VTS测试
+
+    打开终端命令行
+
+    切换到android-vts路径下
+
+    $ cd *installation-path*/android-vts/tools
+
+    通过下面的命令来进入到vts的控制台
+
+    $ .vts-tradefed
+
+    运行vts的测试命令
+
+    > run vts
+
+VTS常用命令
+
+    列出所有跑测结果
+
+    > l r
+
+    列出所有检测到或已知的设备
+
+    > l d
+
+    单跑某一个模块
+
+    > run vts -m <模块名>
+
+    单跑某个测试项
+
+    > run vts -m <模块名> -t <测试项名>
+
+    可用选项
+
+    > run vts -s <device_id> --logcat-on-failure --screenshot-on-failure --shard-count <shards>
+
+    '-s <device_id>'：可指定运行测试的设备
+    '--logcat-on-failure'：当测试失败时捕获logcat
+    '--screenshot-on-failure'：当测试失败时截取屏幕截图
+    '--shard-count <shards>'：用多个设备上同时跑测，可节省时间
+
+    更多的命令可通过 help all 来查看:
+
+作者：Darkt
+链接：https://www.jianshu.com/p/4576b2c76e9e
+來源：简书
+著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。

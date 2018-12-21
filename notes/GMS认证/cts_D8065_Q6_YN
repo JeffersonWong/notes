@@ -1,0 +1,47 @@
+#!/bin/bash
+
+#rm ~/gcc
+#ln -s /usr/bin/gcc-4.6 ~/gcc
+
+PRJPATH=D8065_YN_0914
+SRCPATH=../$PRJPATH/out/host/linux-x86
+DESTPATH=./$PRJPATH/out/host/linux-x86
+#echo "$SRCPATH ; $DESTPATH"
+mkdir -p $DESTPATH
+CopyFile()
+{
+	list=` ls $SRCPATH`
+	time1=`date +%s`
+	echo "Start copy $SRCPATH to $DESTPATH : $data1"
+	for i in $list
+	do 
+		if [ "$i" = "bin" ]; then
+		echo "copy $SRCPATH/$i to $DESTPATH/$i"
+		cp -rfu $SRCPATH/$i $DESTPATH
+		elif [ "$i" = "lib" ]; then
+		echo "copy $SRCPATH/$i to $DESTPATH/$i"
+		cp -rfu $SRCPATH/$i $DESTPATH
+		elif [ "$i" = "lib64" ]; then
+		echo "copy $SRCPATH/$i to $DESTPATH/$i"
+		cp -rfu $SRCPATH/$i $DESTPATH
+		fi
+	done
+}
+
+CopyFile
+time2=`date +%s`
+let time_used=($time2 - $time1)
+let time_h=($time_used/3600)
+let time_m=($time_used%3600/60)
+let time_s=($time_used%60)
+time_string=$time_h:$time_m:$time_s
+
+echo -e "\033[32m $SRCPATH copy Comleted !!! Used($time_string) \033[0m"
+
+export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+export JRE_HOME=${JAVA_HOME}/jre
+export CLASSPATH=.:${JAVA_HOME}/lib:${JRE_HOME}/lib
+export PROJECT_HOME=~/Version/Android_GMS_Test/$PRJPATH/out/host/linux-x86
+export PATH=~/:${JAVA_HOME}/bin:$PATH:${PROJECT_HOME}/bin:${PROJECT_HOME}/lib:${PROJECT_HOME}/lib64
+export ANDROID_JACK_VM_ARGS="-Dfile.encoding=UTF-8 -XX:+TieredCompilation -Xmx4g"
+echo "ANDROID_JACK_VM_ARGS=$ANDROID_JACK_VM_ARGS"

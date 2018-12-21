@@ -1,0 +1,605 @@
+cts说明：
+1、打开开发者模式、Stay awake、USB debugging、Verify apps over USB
+2、语言：英语(美国)，输入法：英语
+3、wifi链接外网，打开蓝牙,旁边放至少一台可以搜索到的蓝牙设备
+4、显示->睡眠设置为最大
+5、Location打开
+6、Accounts里面的帐号需要是空
+7、插一张t卡一张sim卡，数据连接需要打开
+8、安装CtsDeviceAdmin.apk（在android-cts\repository\testcases目录中）
+9、Security->锁盘改为none，Device administrators中勾选前三项
+10、如果默认浏览器是谷歌浏览器，请进入一次，主要是跳过谷歌浏览器的一个初始提示
+11、链接linux电脑，到android-cts-media-1.1目录下执行./up_copy_media.sh脚本
+12、linux中执行./android-cts/tools/cts-tradefed，即准备测试cts
+13、第一次执行run cts --plan CTS --skip-preconditions
+14、跑完后，如果有未测试项，手动把fail项全部改为未测试项，更改完毕后，执行l r查看当前执行的Session号，然后执行
+add derivedplan --plan notExecutedRetry -s 0 -r notExecuted
+，可把未测试项添加成一个pan，然后再执行run cts --plan notExecutedRetry --skip-preconditions继续测试
+15、跑单个测试case：
+（如：）run cts -c com.android.cts.devicepolicy.ManagedProfileTest -m testCrossProfileIntentFilters --skip-preconditions
+
+
+命令 
+run cts --plan <test_plan_name>
+run cts -p < java_package_name>
+ run cts -c < java_calss_name> -m <test_name>
+
+结果分析：
+1.MTK_SIGNATURE_CUSTOMIZATION=yes，修改主make,user版本
+
+2.ro.adb.secure =1,修改build/core/main.mk，user版本本来就是1
+
+3.去掉digital_widgit(酷宇)
+
+4.需要./mk gen-relkey
+
+5.[FAQ12195][CTS Fail]android.security.cts.CertificateTest#testNoRemovedCertificates, Need ALPS01621727  patch done!
+
+6.[FAQ11570]android.admin.cts.DeviceAdminActivationTest#testActivateGoodReceiverDisplaysActivationUi,Settings >  security > Select device administrators
+
+7.[FAQ08388]CTS Fail: android.app.cts.SystemFeaturesTest
+(1)--testCameraFeatures
+junit.framework.AssertionFailedError: PackageManager#hasSystemFeature should return true for android.hardware.camera.flash at android.app.cts.SystemFeaturesTest.assertAvailable(SystemFeaturesTest.java:374) 
+修改android.hardware.camera.xml，add     <feature name="android.hardware.camera.flash" />
+(2)--testSensorFeatures
+junit.framework.AssertionFailedError: PackageManager#hasSystemFeature(android.hardware.sensor.compass) returns true but SensorManager#getSensorList(2) shows sensors [] expected:<true> but was:<false> at junit.framework.Assert.fail(Assert.java:50) 
+compass配置错误，机器没有compass，主make中去掉磁力感应器相关
+
+8.android.os.cts.BuildVersionTest,ro.build.fingerprint需规范化，参考BuildVersionTest.java
+变量都要符合要求"^([0-9A-Za-z._-]+)$"，不能出现空格，参考BuildTest.java
+
+9.-- testUnknownSourcesOffByDefault,'Unknown Sources' enabled by default 0
+
+10.android.security.cts.BannedFilesTest,
+-- testNoSu
+-- testNoSuInPath
+需要编usr版本，否则system\xbin\su need to be deleted!
+
+
+11.android.security.cts.KernelSettingsTest
+-- testNoConfigGz:
+junit.framework.AssertionFailedError: /proc/config.gz is readable. Please recompile your kernel with CONFIG_IKCONFIG_PROC disabled at android.security.cts.KernelSettingsTest.testNoConfigGz(KernelSettingsTest.java:112) 
+
+-- testSetuidDumpable
+need user 版本
+
+12.-- testSmsUsageMonitor,PhoneNumberUtils.java,112改成emergency number 去掉S18修改。
+
+13.android.admin.cts.DevicePolicyManagerTest
+Compatibility Test Package: android.admin 
+Test Result Details 
+ 
+android.admin.cts.DevicePolicyManagerTest 
+-- testAndroidTestCaseSetupProperly fail java.lang.SecurityException: No active admin ComponentInfo{android.deviceadmin.cts/android.deviceadmin.cts.CtsDeviceAdminReceiver} at android.os.Parcel.readException(Parcel.java:1472)  
+-- testGetActiveAdmins fail java.lang.SecurityException: No active admin ComponentInfo{android.deviceadmin.cts/android.deviceadmin.cts.CtsDeviceAdminReceiver} at android.os.Parcel.readException(Parcel.java:1472)  
+======设置-> 安全设置->Delegatin AccessibilitySservice 打开
+
+
+14.去掉frameworks\base\data\etc\platform.xml，下的外卡写权限，否则CTS fail
+com.android.cts.appsecurity.AppSecurityTests
+testExternalStorageWrite, system\etc\permissions\platform.xml,
+
+<permission name="android.permission.WRITE_EXTERNAL_STORAGE" >
+        <group gid="sdcard_r" />
+        <group gid="sdcard_rw" />
+    </permission>
+
+15.android.webkit.cts.GeolocationTest
+ -- testSimpleGeolocationRequestAcceptAlways 
+ fail  junit.framework.AssertionFailedError: JS didn't get position at android.cts.util.PollingCheck.check(PollingCheck.java:70)
+ -- testSimpleGeolocationRequestAcceptOnce 
+ fail junit.framework.AssertionFailedError: JS didn't get position at android.cts.util.PollingCheck.check(PollingCheck.java:70) 
+ 
+ 
+[Solution]
+需要在settings中打开Location开关，若在settings中关闭Location开关对比机上亦会Fail（Nexus 4, Nexus 5）
+
+16.tests.api.java.nio.charset.GBCharsetEncoderTest 
+-- test_canEncode_CharSequence_ICUBug fail junit.framework.AssertionFailedError at tests.api.java.nio.charset.CharsetEncoderTest.test_canEncode_CharSequence_ICUBug(CharsetEncoderTest.java:544) 
+-- test_canEncode_char_ICUBug fail junit.framework.AssertionFailedError at tests.api.java.nio.charset.CharsetEncoderTest.test_canEncode_char_ICUBug(CharsetEncoderTest.java:539) 
+非正式patch, 未合入正式版本
+
+
+17.[CTS]Compatibility Test Package: android.telephony
+android.telephony.cts.SmsManagerTest 
+-- testSendMessages fail junit.framework.AssertionFailedError at android.telephony.cts.SmsManagerTest.testSendMessages(SmsManagerTest.java:278)  
+ 
+android.telephony.gsm.cts.SmsManagerTest 
+-- testSendMessages fail junit.framework.AssertionFailedError at android.telephony.cts.SmsManagerTest.testSendMessages(SmsManagerTest.java:278)  
+
+解决办法：默认联通卡发送，并且要求写入本机号码。
+如果是CU，设置->sim卡管理->Auto-push service打开
+
+18.
+android.view.cts.DisplayRefreshRateTest	已提交eservice,ALPS02099652
+-- testRefreshRate	
+
+Eservice解决：
+请在alps/mediatek/platform/mt6572/lk/mt_disp_drv.c文件中如下修改，参考//mtk modify的代码： 
+mt_disp_get_lcd_time() 
+{ 
+。。。。。。 
+。。。。。。 
+printf("lcd one %d \n", lcd_time); 
+mt_disp_adjusting_hardware_addr(); 
+
+if(0 != lcd_time)	
+return (100000000/lcd_time+5400); //mtk modify 
+else 
+return (6000); 
+}
+
+Sunvov由于用了72M芯片，需要更新libdevsec.a，并且调整lcm时序，使得 |claimed - achieved|<=2
+DisplayRefreshRateTest: claimed 41.43 fps, achieved 84.93828 fps
+
+19.CtsJobSchedulerDeviceTestCases:
+--testUnmeteredConstraintFails_withMobile
+junit.framework.AssertionFailedError: Device must have access to a metered network for this test. at junit.framework.Assert.fail(Assert.java:50) 
+wifi外网链接问题
+
+20.android.net.cts.DnsTest
+--testDnsWorks
+testDnsWorks需要ipv6才可以测试通过，就是找一个vpn可以连接到美国去才行，香港台湾都不行
+
+21、android.net.cts.legacy.api22.ConnectivityManagerLegacyTest
+-- testStartUsingNetworkFeature_enableHipri
+set APN and in the APN type field include "hipri"
+
+22、android.media.cts.StreamingMediaPlayerTest
+-- testHTTP_H264Base_AAC_Video1
+Test failed to run to completion. Reason: 'Instrumentation run failed due to 'java.lang.IllegalStateException''. Check device logcat for details
+这项是验证streaming 功能的，务必要翻墙，如果贵司确定手机可以正常播放youtube上面的视频（保证30分钟以上不掉线），请提eservice
+
+23、android.app.cts.SystemFeaturesTest
+-- testSensorFeatures
+junit.framework.AssertionFailedError: PackageManager#hasSystemFeature(android.hardware.sensor.compass) returns true but SensorManager#getSensorList(2) shows sensors [] expected:<true> but was:<false> at junit.framework.Assert.fail(Assert.java:50) 
+原因是机器不带指南针，而项目中配置了
+主make中CUSTOM_KERNEL_MAGNETOMETER =空着，不要填写no或none
+移除frameworks/native/data/etc/handheld_core_hardware.xml中的<feature name="android.hardware.sensor.compass" />
+
+24、com.android.cts.appsecurity.AdoptableHostTest
+-- testPrimaryStorage
+java.lang.AssertionError: Expected success string but found Error: java.lang.IllegalStateException: Move already in progress 
+跑测试的时候所有的音频文件以及安装的apk都在internal storage里，这个full run的时候高概率会出现Move already in progress，因为您internal storage里面音频文件，
+apk，media file等等文件太多。 case本身不合理，Google的意思是您第二轮跑fail的cases时，清空internal storage再单独跑pass testPrimaryStorage这一项就行了
+
+25、com.android.cts.browser.BrowserBenchTest
+-- testOctane
+Test failed to run to completion. Reason: 'Instrumentation run failed due to 'junit.framework.AssertionFailedError''. Check device logcat for details 
+设置一个默认的浏览器即可
+设置方法：
+a.可以设置android 原生的浏览器: Browser
+方法： 用短信的方式，发一个link到手机上，点击link 就可以设置一下默认浏览器
+b. 需要设置google 的搜索引擎，
+方法： 进入原生Browser -> setting -> Advanced -> Set search engine ->选择google
+烦请按上述方法设置后再测试
+
+26、android.hardware.camera2.cts.ExtendedCameraCharacteristicsTest
+--testAvailableStreamConfigs
+junit.framework.AssertionFailedError: Required HD size not found 
+-> 这条测试项会fail的原因在于: 如果最大的Pic Size超过(或者等于)HD(1280x720), 就必须包含HD的size. 同理，还有其他：
+    private static final Size FULLHD = new Size(1920, 1080);
+    private static final Size FULLHD_ALT = new Size(1920, 1088);
+    private static final Size HD = new Size(1280, 720);
+    private static final Size VGA = new Size(640, 480);
+    private static final Size QVGA = new Size(320, 240);
+所以，我们增加相应的Pic Size.
+
+27、android.media.cts.CamcorderProfileTest
+-- testGet
+junit.framework.AssertionFailedError at junit.framework.Assert.fail(Assert.java:48) 
+查看device_logcat.txt文件，其中可以看到CamcorderProfileTest: Size (352x288) is not supported这样的信息，说明需要在录像尺寸中添加352x288
+
+28、android.hardware.camera2.cts.FlashlightTest
+--testCameraDeviceOpenAfterTorchOn
+MTK_FLASH_INFO_AVAILABLE_FALSE 改为 MTK_FLASH_INFO_AVAILABLE_TRUE
+
+29、android.hardware.camera2.cts.StillCaptureTest
+-- testStillPreviewCombination
+Test failed to run to completion. Reason: 'Instrumentation run failed due to 'java.lang.IllegalArgumentException''. Check device logcat for details
+检查camera的feature table ，最大的preview size一定要小于最大的picture size
+
+30、android.hardware.camera2.cts.ImageReaderTest
+-- testYuvAndJpeg
+Test failed to run to completion. Reason: 'Instrumentation run failed due to 'java.lang.IllegalArgumentException''. Check device logcat for details
+检查camera的feature table ，最大的preview size一定要小于最大的picture size
+
+31、android.hardware.cts.CameraTest
+-- testSceneMode
+junit.framework.AssertionFailedError at junit.framework.Assert.fail(Assert.java:48) 
+CTS要求scene mode下的white balance要包含所有的
+检查camera的feature table，SCENE_AS_DEFAULT_SCENE中的值与SCENE_AS_(MtkCameraParameters::SCENE_MODE_要匹配
+
+==========================================================GTS 注意事项：
+1.VPN要求高，需要反复测试。
+2、com.google.android.xts.afw.AfwRequiredAppsOverlaysTest
+-- testContactsRequiredManagedDeviceOverlay
+ junit.framework.AssertionFailedError: ManagedProvisioning overlay [com.android.launcher, com.google.android.dialer, com.android.vending, com.google.android.launcher, com.google.android.contacts, com.google.android.gms, com.google.android.googlequicksearchbox] doesn't contain a contacts app. Preinstalled apps of this type are [com.android.contacts] at com.google.android.xts.afw.AfwRequiredAppsOverlaysTest.assertSetsOverlap(AfwRequiredAppsOverlaysTest.java:189)  
+	這個問題是GTS和GMS包不一致造成.(GTS預期存在com.google.android.contacts app，但是目前GMS包上並沒有)。需要修改GMS包中overlay的資料。
+	将google\products\gms_overlay\packages\apps\ManagedProvisioning\res\values\vendor_required_apps_managed_device.xml中的
+com.google.android.contacts替换成贵司自己的contacts app（如默认的com.android.contacts）
+
+3、com.google.android.xts.placement.UiPlacementTest
+-- testPlayStore
+java.lang.NullPointerException: Attempt to invoke virtual method 'void android.support.test.uiautomator.UiObject2.click()' on a null object reference at com.google.android.xts.placement.UiPlacementTest.tryElement(UiPlacementTest.java:76) 
+这项测试有两点，一个是从launcher上寻找playstore的icon，如果没有找到会fail，如果有找到会点击打开playstore，如果playstore在规定时间没有打开也会fai
+
+4、com.google.android.xts.permissions.InitialRuntimePermissionStateTest
+-- testAllSystemAppsUsingRuntimePermissionsTargetMncAndAboveSdk
+ junit.framework.AssertionFailedError: testAllSystemAppsUsingRuntimePermissionsTargetMncAndAboveSdk errors: Package:com.android.email uses runtime permissions but doesn't target 23+ SDK  
+	如果有使用 M 的 platform 預安裝的 apk 需要升級到SDK23 才可以使用 runtime permission 
+所以报此类错误时，请确认报错的package是否都有支持SDK23
+1. 对于有源码的APK，需要在AndroidManifest.xml里边设置android:targetSdkVersion="23" 
+2. 对于没有源码的apk，确认无源码的APK的来源（如第三方APK，或GMS APK，或MTK），请该developer提供支持SDK23之APK再包入load重新烧img.即可pass.
+
+5、com.google.android.xts.permissions.DefaultPermissionGrantPolicyTest
+-- testDefaultGrants
+junit.framework.AssertionFailedError: Permission:android.permission.WRITE_EXTERNAL_STORAGE cannot be granted by default to package:com.android.gallery3d Permission:android.permission.READ_EXTERNAL_STORAGE cannot be granted by default to package:com.android.gallery3d 
+去掉mtk图库
+mtk：ALPS02575263（让客户向谷歌申请豁免）
+
+==========================================================CTS Verify  注意事项：
+1、CTS Sensor Test
+testBatchAndFlush | FAIL | testBatchAndFlush(android.hardware.cts.SensorTest): WaitForFlush | sensor='PROXIMITY', samplingPeriod=0us, maxReportLatency=10000000us | timeout=10000000us
+需要测试时用手在Psensor上方遮挡
+
+2、Hifi Ultrasound Microphone Test与Hifi Ultrasound Speaker Test
+这2题需要在较安静的环境下进行测试，另外有些注意事项： 
+1. Speaker的volume 可以調整到夠大的階數, 不用限定在所謂的 70% 
+2. 一開始測試可能和一些擺放位置/環境噪音/聲音不夠大的因素會Fail, 可以盡量調整到可以測試Pass為止. 但是一旦可以測試Pass, 
+就要確保這個環境下都要能夠持續通過測試 
+
+3、Audio Loopback Latency Test
+这题需要额外的loopback plug dongle，请参考如下原理图制造一个，为了保证设备合格，请制造完毕之后放到nexus上测试一下这条case，感谢~ 
+https://source.android.com/devices/audio/loopback.html 
+
+
+4.  Data Backup Tes
+	1.进入CTS Verifier > 选择“Data Backup Test” > 选择 “OK” > 选择 “Generate Test Data” > 选择 “Settings” > 勾选“Back up my data” >按“返回”键
+	
+	2.记录当前界面显示的数据。
+	
+	3.在PC端输入依次输入以下命令
+	adb shell bmgr enable true
+	adb shell bmgr transport android/com.android.internal.backup.LocalTransport
+	adb shell bmgr run
+	adb uninstall com.android.cts.verifier
+	adb install CTSVerifier.apk
+	
+	4.再进入CTS verifier > 选择“Data Backup Test” > 选择 “OK” >记录当前界面显示的数据，并与第一次记录的数据进行对比。如果两份数据相同，则备份成功，否则失败。
+	
+5.	
+
+
+
+*******************************************************************
+展讯start
+******************************************************************
+1.FAQ96771 Cts测试前对linux pc的必要配置项
+
+[QUESTION]
+Cts测试前对linux pc的必要配置项
+
+[ANSWER]
+1.配置vid到adb_usb.ini文件中（linux pc用户目录以 /home/apuser/为例） 
+
+如果在/home/apuser/.android/目录下没有.android文件，按照以下命令，进行操作： 
+
+~$ cd ~/.android  
+
+~$ mkdir ~/.android 
+
+~$ echo 0x1782 >~/.android/adb_usb.ini 
+
+可以查看/home/apuser/.android/adb_usb.ini是否生成成功，且内容为 0x1782 
+
+注： 
+
+1.1红色部分为创建.android文件夹命令 
+
+1.2如果.android文件夹右下解一把锁的标志，需要进行解锁，命令如下： 
+
+sudo chmod –R 777 路径(文件夹或文件) 
+
+1.3 可以通过lsusb命令来查看pid/vid
+
+如下例子中表示spreadtrum参考机器的pid为1782，vid为4d00：
+
+SPREADTRUM\jonas.yang@bj04688pcu:~$ lsusb
+Bus 001 Device 002: ID 8087:0024 Intel Corp. Integrated Rate Matching Hub
+Bus 002 Device 002: ID 8087:0024 Intel Corp. Integrated Rate Matching Hub
+Bus 003 Device 005: ID 1782:4d00 Spreadtrum Communications Inc. 
+Bus 001 Device 001: ID 1d6b:0002 Linux Foundation 2.0 root hub
+Bus 002 Device 001: ID 1d6b:0002 Linux Foundation 2.0 root hub
+Bus 003 Device 001: ID 1d6b:0002 Linux Foundation 2.0 root hub
+
+SPREADTRUM\jonas.yang@bj04688pcu:~$ lsusb
+Bus 001 Device 002: ID 8087:0024 Intel Corp. Integrated Rate Matching Hub
+Bus 002 Device 002: ID 8087:0024 Intel Corp. Integrated Rate Matching Hub
+Bus 003 Device 005: ID 1782:4d00 Spreadtrum Communications Inc. 
+Bus 001 Device 001: ID 1d6b:0002 Linux Foundation 2.0 root hub
+Bus 002 Device 001: ID 1d6b:0002 Linux Foundation 2.0 root hub
+Bus 003 Device 001: ID 1d6b:0002 Linux Foundation 2.0 root hub
+Bus 004 Device 001: ID 1d6b:0003 Linux Foundation 3.0 root hub
+Bus 001 Device 003: ID 147e:1002 Upek 
+Bus 001 Device 004: ID 8087:07da Intel Corp. 
+Bus 001 Device 005: ID 5986:02d4 Acer, In
+  
+
+2.  配置51-android.rules文件  
+
+2.1 sudo gedit /etc/udev/rules.d/51-android.rules 
+
+2.2 打开的文档里面输入
+            SUBSYSTEM=="usb", ATTR{idVendor}=="1782", MODE="0666", GROUP="plugdev"
+        2.3 给51-android.rules赋予权限并重新启动服务
+            sudo chmod a+r /etc/udev/rules.d/51-android.rules
+             sudo service udev restart
+  
+
+注意：如上两个步骤中的vid 是展讯默认的1782， 客户对应手机有修改，请做相应更改。 
+
+Bus 004 Device 001: ID 1d6b:0003 Linux Foundation 3.0 root hub
+Bus 001 Device 003: ID 147e:1002 Upek 
+Bus 001 Device 004: ID 8087:07da Intel Corp. 
+Bus 001 Device 005: ID 5986:02d4 Acer, In
+
+
+
+2.[FAQ96975] :安卓6.0上如何使用多台手机测试CTS生成一份报告，缩短测试时间
+[QUESTION]
+android 6.0 上，一般测试一次CTS会花费十几个小时，如何在跑CTS时将任务分配到几个相同的手机上测试，完成后生成一份报告，缩短CTS测试时间？
+
+[ANSWER]
+
+测试步骤：
+
+1.需要新建一个文件夹，文件夹里面只有android-cts这一个测试包文件夹，不能包含其他文件。
+
+2.按照测试CTS的要求配置需要测试的手机， 比如要用3台手机来测试，则需要保证3台手机软件版本等相同，然后拷入资源做好设置。
+
+3.使用run cts [options] --shards number_of_shards  命令来测试
+
+例如：要在3台手机上测试cts，
+
+则输入命令： run cts --plan CTS --shards 3
+
+就可以了，3台手机预计7个小时可以跑完，
+
+4.当跑完一次测试后，会有fail 项和未执行项（此时继续处理这些项时无法直接用添加--shards 的方式来分布式测试）
+
+处理这些fail和未执行项常规方法如下：
+
+测未执行项可以直接用run cts --continue-session session_ID
+
+测试fail项可以用add derivedplan --plan plan_name，新建测试计划后再跑，也可以改报告为未执行项用上面的continue命令测试。  
+
+当未执行项比较多时，可能还是会花费很长时间，
+
+这时可以将未执行项添加为一个新的测试计划， 然后再用run cts [options] --shards number_of_shards 命令来测试
+
+
+
+
+3.[FAQ96454] :CTS对fingerprint配置的要求
+[QUESTION]
+CTS对"ro.build.fingerprint"配置的要求
+
+[ANSWER]
+根据cts code和平常的经验，我们总结了5条关于CTS对"ro.build.fingerprint"属性的要求，具体如下：
+
+1、必须按照如下格式拼接fingerprint，其中各项prop的名字不要随意添加“/”，因为cts是通过“/”来分割各项配置进行判断的
+
+[ro.build.brand]/[ro.product.name]/[ro.product.device]:[ro.build.version.release]/[ro.build.id]/[ro.build.version.incremental]:[ro.build.type]/[ro.build.tags]
+
+对应的code为：
+
+frameworks/base/core/java/android/os/Build.java
+
+    private static String deriveFingerprint() {
+        String finger = SystemProperties.get("ro.build.fingerprint");
+        if (TextUtils.isEmpty(finger)) {
+            finger = getString("ro.product.brand") + '/' +
+                    getString("ro.product.name") + '/' +
+                    getString("ro.product.device") + ':' +
+                    getString("ro.build.version.release") + '/' +
+                    getString("ro.build.id") + '/' +
+                    getString("ro.build.version.incremental") + ':' +
+                    getString("ro.build.type") + '/' +
+                    getString("ro.build.tags");
+        }
+        return finger;
+    }
+2、[ro.product.device]、[ro.build.version.release]、[ro.build.version.incremental]、[ro.build.type]的名字不要包含":"
+
+3、ro.build.type值必须为"user"
+
+4、ro.build.tags值必须为"release-keys"
+
+5、fingerprint总的长度不能大于92个字符
+
+注意：不可修改prop的长度来将ro.build.fingerprint值的长度加长，否则会导致系统问题
+
+对应的cts case为android.os.cts.BuildVersionTest -- testBuildFingerprint，若cts测试中这条case fail，请按照如上要求检查，对应的code为：
+
+cts/tests/tests/os/src/android/os/cts/BuildVersionTest.java
+    public void testBuildFingerprint() {
+        final String fingerprint = Build.FINGERPRINT;
+        Log.i(LOG_TAG, String.format("Testing fingerprint %s", fingerprint));
+
+        assertEquals("Build fingerprint must not include whitespace", -1,
+                fingerprint.indexOf(' '));
+        final String[] fingerprintSegs = fingerprint.split("/");
+        assertEquals("Build fingerprint does not match expected format", 6, fingerprintSegs.length);
+        assertEquals(Build.BRAND, fingerprintSegs[0]);
+        assertEquals(Build.PRODUCT, fingerprintSegs[1]);
+
+        String[] devicePlatform = fingerprintSegs[2].split(":");
+        assertEquals(2, devicePlatform.length);
+        assertEquals(Build.DEVICE, devicePlatform[0]);
+        assertEquals(Build.VERSION.RELEASE, devicePlatform[1]);
+
+        assertEquals(Build.ID, fingerprintSegs[3]);
+
+        assertTrue(fingerprintSegs[4].contains(":"));
+        String[] buildNumberVariant = fingerprintSegs[4].split(":");
+        String buildVariant = buildNumberVariant[1];
+        assertEquals("Variant", EXPECTED_BUILD_VARIANT, buildVariant);
+        assertEquals("Tag", EXPECTED_TAG, fingerprintSegs[5]);
+    }
+
+
+
+*******************************************************************
+展讯end
+******************************************************************
+
+***********************************
+CTS 7301 XT start
+***********************************
+1.android.appsecurity.cts.ExternalStorageHostTest#testExternalStorageWrite fail java.lang.AssertionError: on-device tests failed: 
+[FAQ18356]关于ExternalStorageHostTest CTS fail的建议
+1，export SECONDARY_STORAGE /storage/sdcard1，测试时没插入SD card
+       2. platform.xml中放大写SD卡的权限，write_external_storage中增加了media_rw的group
+       3. init.xxx.rc中对某个路径开特别大的权限，主要是check下rc文件中对storage的相关修改
+       4. 安装特别的apk或者自己有客制化某些apk，比如launcher，download provider等
+       5. 在跑CTS之前清空phone storage
+       6，正常的wifi环境，内部测试过程插入T卡，设置为Portable storage（有format），并连接翻墙Wifi AP
+       7，sdcard.c是否有merege如下patch：
+diff --git a/sdcard/sdcard.c b/sdcard/sdcard.c
+index 9cfb040..59e462c 100644
+--- a/sdcard/sdcard.c
++++ b/sdcard/sdcard.c
+@@ -198,6 +198,8 @@ struct node {
+* position. Used to support things like OBB. */
+char* graft_path;
+size_t graft_pathlen;
++
++ bool deleted;
+};
+
+static int str_hash(void *key) {
+@@ -630,6 +632,8 @@ struct node *create_node_locked(struct fuse* fuse,
+node->ino = fuse->inode_ctr++;
+node->gen = fuse->next_generation++;
+
++ node->deleted = false;
++
+derive_permissions_locked(fuse, parent, node);
+acquire_node_locked(node);
+add_node_to_parent_locked(node, parent);
+@@ -703,7 +707,7 @@ static struct node *lookup_child_by_name_locked(struct node *node, const char *n
+* must be considered distinct even if they refer to the same
+* underlying file as otherwise operations such as "mv x x"
+* will not work because the source and target nodes are the same. */
+- if (!strcmp(name, node->name)) {
++ if (!strcmp(name, node->name) && !node->deleted) {
+return node;
+}
+}
+@@ -1067,6 +1071,7 @@ static int handle_unlink(struct fuse* fuse, struct fuse_handler* handler,
+{
+bool has_rw;
+struct node* parent_node;
++ struct node* child_node;
+char parent_path[PATH_MAX];
+char child_path[PATH_MAX];
+
+@@ -1088,6 +1093,12 @@ static int handle_unlink(struct fuse* fuse, struct fuse_handler* handler,
+if (unlink(child_path) < 0) {
+return -errno;
+}
++ pthread_mutex_lock(&fuse->lock);
++ child_node = lookup_child_by_name_locked(parent_node, name);
++ if (child_node) {
++ child_node->deleted = true;
++ }
++ pthread_mutex_unlock(&fuse->lock);
+return 0;
+}
+
+@@ -1095,6 +1106,7 @@ static int handle_rmdir(struct fuse* fuse, struct fuse_handler* handler,
+const struct fuse_in_header* hdr, const char* name)
+{
+bool has_rw;
++ struct node* child_node;
+struct node* parent_node;
+char parent_path[PATH_MAX];
+char child_path[PATH_MAX];
+@@ -1117,6 +1129,12 @@ static int handle_rmdir(struct fuse* fuse, struct fuse_handler* handler,
+if (rmdir(child_path) < 0) {
+return -errno;
+}
++ pthread_mutex_lock(&fuse->lock);
++ child_node = lookup_child_by_name_locked(parent_node, name);
++ if (child_node) {
++ child_node->deleted = true;
++ }
++ pthread_mutex_unlock(&fuse->lock);
+return 0;
+}     
+
+2.android.carrierapi.cts.CarrierApiTest#testHasCarrierPrivileges fail junit.framework.AssertionFailedError: This test requires a SIM card with carrier privilege rule on it.  
+[FAQ19201][CTS 7.0_r1]android.carrierapi.cts.CarrierApiTest#testHasCarrierPrivileges
+这条case需要特殊的SIM卡,需要把CtsCarrierApiTestCases.apk 的certificate hash code加到SIM卡中。
+我司是请第三方Gemalto-金雅拓联系，然后他们帮忙提供符合CTS测试要求的SIM卡的，贵司不妨联系一下这家公司。
+http://www.gemalto.com/china/companyinfo/；
+关于certificate hash code，请查看：https://source.android.com/devices/tech/config/uicc.html
+
+3.
+com.android.cts.net.HostsideVpnTests#testAppDisallowed fail java.lang.AssertionError: on-device tests failed: 
+[FAQ19336][7.0_r3]com.android.cts.net.HostsideVpnTests#testAppDisallowed
+请确保Wifi AP能使用IPv6翻牆，如果只有翻墙的IPv4网络，Nexus对比机也是一样fail.
+
+4.libcore.java.io.FileInputStreamTest#testSkipOnLargeFiles fail Test failed to run to completion. Reason: 'Instrumentation run failed due to 'Process crashed.''. Check device logcat for details 
+[FAQ19637][CTS 7.0_R6]libcore.java.io.FileInputStreamTest#testSkipOnLargeFiles
+CTS这种case的要求是5分钟要跑完，否则CTS进程超时会crash 。
+这题跟emmc性能有关，敝司内部80N跑androbench数据如下：
+Sequential Read：129.38MB/s
+Sequential Write:18.5 MB/s
+Random Read:22.61MB/s,5789.74 IOPS(4KB)
+Random Write:5.6MB/s,1434.29 IOPS(4KB)
+请在网上下载androbench APK,测试贵司的数据，如果达不到敝司内部的水平请联系物料厂商看看能否优化.
+
+5.libcore.java.net.URLTest#testMultipleUserField fail junit.framework.AssertionFailedError: Expected: <null> but was: multiple  
+
+6.libcore.javax.crypto.CipherTest#test_DefaultGCMTagSizeAlgorithmParameterSpec fail junit.framework.AssertionFailedError: expected:<12> but was:<16>  
+
+请合入这笔Google Patch:
+ALPS02840769 [[Google Security Patch][CVE-2016-2427]Elevation of privilege vulnerability in Debuggerd]
+
+7.android.net.cts.DnsTest#testDnsWorks fail junit.framework.AssertionFailedError: [RERUN] DNS could not resolve ipv6.google.com, check the network supports IPv6  
+
+8.android.net.cts.MultinetworkApiTest#testNativeDatagramTransmission fail android.system.ErrnoException: DatagramCheck on [type: WIFI[], state: CONNECTED/CONNECTED, reason: (unspecified), extra: "ConnectWan", failover: false, available: true, roaming: false, metered: false] failed: EPROTO (Protocol error)  
+
+[FAQ18948]android.net.cts.MultinetworkApiTest#testNativeDatagramTransmission
+android.system.ErrnoException: DatagramCheck on [type: WIFI[], state: CONNECTED/CONNECTED, reason: (unspecified), extra: "HiWiFi_transage_5G", roaming: false, failover: false, isAvailable: true] failed: EPROTO (Protocol error)
+->>这个报错一般是翻墙wifi连不上server，请更换不同的VPN测试
+ 
+android.system.ErrnoException: DatagramCheck on [type: WIFI[], state: CONNECTED/CONNECTED, reason: (unspecified), extra: "Teksun_GMS", roaming: false, failover: false, isAvailable: true] failed: EPERM (Operation not permitted) 
+->>这个报错一般连接的是virtual network，比如手机连上普通wifi以后，再使用翻墙的软件。导致其底层认为你当前的网络是虚拟的，但是由于当前跟CTS的这个进程对应的UID不在protecteduser里面，因此导致测试无法通过。
+ 
+因此，还请检查贵司翻墙wifi的网络情况，在对比机pass的情况下再测试。
+
+
+9.android.os.cts.BuildVersionTest#testBuildFingerprint fail junit.framework.AssertionFailedError: Build fingerprint does not match expected format expected:<6> but was:<4>  
+
+10.android.security.cts.StagefrightTest#testStagefright_bug_27855419_CVE_2016_2463 fail junit.framework.AssertionFailedError: Device *IS* vulnerable to BUG-27855419 
+
+11.android.permission2.cts.PermissionPolicyTest#testPlatformPermissionPolicyUnaltered fail junit.framework.AssertionFailedError: Cannot define permission android.permission.SPRD_MODIFY_PHONE_STATE in android namespace  
+
+
+
+webView
+12.android.webkit.cts.ServiceWorkerClientTest#testServiceWorkerClientInterceptCallback fail java.lang.AbstractMethodError: abstract method "android.webkit.ServiceWorkerController android.webkit.WebViewFactoryProvider.getServiceWorkerController()"  
+
+13.android.webkit.cts.WebViewClientTest#testShouldOverrideUrlLoading fail junit.framework.AssertionFailedError  
+
+14.android.webkit.cts.WebViewTest#testCreatingWebViewWithDeviceEncrpytionFails fail junit.framework.AssertionFailedError: WebView should have thrown exception when creating with a device protected storage context  
+
+15.android.webkit.cts.WebViewTest#testCreatingWebViewWithMultipleEncryptionContext fail junit.framework.AssertionFailedError: WebView should have thrown exception when creating with a device protected storage context  
+
+***********************************
+CTS 7301 XT end
+***********************************
+
