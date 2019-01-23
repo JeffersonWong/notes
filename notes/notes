@@ -789,8 +789,39 @@ Certification - CTS https://onlinesso.mediatek.com/FAQ#/SW/FAQ03974
 Certification - GTS https://onlinesso.mediatek.com/FAQ#/SW/FAQ05037
 
 白名单 run cts -m CtsSystemCurrentApiSignatureTestCases -t android.signature.cts.api.SignatureTest#testSignature      
+
+run cts-on-gsi -o --retry xx --exclude-filter "CtsAppSecurityHostTestCases android.appsecurity.cts.DirectBootHostTest#testDirectBootEmulated" --exclude-filter "CtsAppSecurityHostTestCases android.appsecurity.cts.DirectBootHostTest#testDirectBootNone" 
+
  
- 
+cts 
+   run cts 
+   -s 指定设备
+   --shard-count
+cts-v
+   
+sts
+run sts-engbuild
+
+
+vts
+刷GSI
+        在设置中打开 OEM unlocking 选项
+        在设置中打开 USB debugging 选项
+        长按音量 + 和电源键进入fastboot模式
+        连接到电脑上，分别执行fastboot oem unlock，
+        执行命令后需要选择音量 + 来确认unlock。
+        执行 fastboot 命令刷入google提供的 system.img (GSI)：
+        fastboot flash system xxx.img（需要根据软件版本的信息来选择GSI版本）
+        重启： fastboot reboot
+
+run vts
+
+        
+
+
+gts
+
+
   
   
 *******************************************************
